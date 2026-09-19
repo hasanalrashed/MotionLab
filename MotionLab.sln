@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MotionLab", "MotionLab\MotionLab.csproj", "{AF961896-EA8C-4663-84D9-41E264B1B365}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MotionLab.Tests", "MotionLab.Tests\MotionLab.Tests.csproj", "{311F8257-1E8B-4FB8-86DD-10B31BC4545B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AF961896-EA8C-4663-84D9-41E264B1B365}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AF961896-EA8C-4663-84D9-41E264B1B365}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AF961896-EA8C-4663-84D9-41E264B1B365}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AF961896-EA8C-4663-84D9-41E264B1B365}.Release|Any CPU.Build.0 = Release|Any CPU
+		{311F8257-1E8B-4FB8-86DD-10B31BC4545B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{311F8257-1E8B-4FB8-86DD-10B31BC4545B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{311F8257-1E8B-4FB8-86DD-10B31BC4545B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{311F8257-1E8B-4FB8-86DD-10B31BC4545B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {DC2B910F-C983-412C-A306-CBDEFFA04FB1}
+	EndGlobalSection
+EndGlobal

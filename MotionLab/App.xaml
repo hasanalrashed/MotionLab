@@ -1,0 +1,8 @@
+<Application x:Class="MotionLab.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Startup="OnStartup">
+    <Application.Resources>
+        <!-- Application-wide resources can be added here -->
+    </Application.Resources>
+</Application>
