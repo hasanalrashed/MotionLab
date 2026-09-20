@@ -30,6 +30,9 @@ namespace MotionLab.ViewModels
         private CancellationTokenSource? _testCts;
 
         [ObservableProperty]
+        private bool _isCalibrating;
+
+        [ObservableProperty]
         private string _testState = "Ready";
 
         [ObservableProperty]
@@ -182,7 +185,72 @@ namespace MotionLab.ViewModels
             }
         }
 
-        private bool CanStartTest() => TestState == "Ready" || TestState == "Complete" || TestState == "Aborted";
+        private bool CanStartTest() => !IsCalibrating && TestState != "Running";
+
+        [RelayCommand(CanExecute = nameof(CanStartTest))]
+        private async Task StartCalibrationAsync()
+        {
+            IsCalibrating = true;
+            StartCalibrationCommand.NotifyCanExecuteChanged();
+            StartTestCommand.NotifyCanExecuteChanged();
+
+            double oldFactor = CurrentConfig.CalibrationFactor;
+            CurrentConfig.CalibrationFactor = 1.0;
+
+            TestState = "Calibrating in 3 seconds...";
+            await Task.Delay(3000);
+
+            TestState = "GO! Move exactly 100mm!";
+
+            _testCts = new CancellationTokenSource();
+            
+            CurrentResults = new TestResults
+            {
+                Surface = "Calibration",
+                TestMode = "Auto-Calibration",
+                StartTime = DateTimeOffset.Now,
+                CalibrationFactor = 1.0
+            };
+            
+            CurrentSampleCount = 0;
+            CurrentDisplacement = 0;
+            CurrentVelocity = 0;
+            CurrentDuration = TimeSpan.Zero;
+            
+            _velocitySeries.Points.Clear();
+            _displacementSeries.Points.Clear();
+            var timeAxis = LivePlotModel.Axes.FirstOrDefault(a => a.Position == AxisPosition.Bottom);
+            if (timeAxis != null)
+            {
+                timeAxis.Minimum = 0;
+                timeAxis.Maximum = double.NaN;
+            }
+            LivePlotModel.InvalidatePlot(true);
+
+            var channel = Channel.CreateUnbounded<RawMotionDataPoint>();
+            var acqTask = _sensor.StartAcquisitionAsync(channel.Writer, CurrentConfig.SamplingIntervalMs, _testCts.Token);
+            var procTask = _processingPipeline.ProcessAsync(channel.Reader, CurrentConfig, CurrentResults, _testCts.Token);
+
+            await Task.Delay(5000);
+
+            _testCts.Cancel();
+            try { await procTask; } catch (OperationCanceledException) { }
+
+            if (CurrentResults.TotalDisplacement > 0)
+            {
+                CurrentConfig.CalibrationFactor = 100.0 / CurrentResults.TotalDisplacement;
+                TestState = $"Calibrated: Factor = {CurrentConfig.CalibrationFactor:F4}";
+            }
+            else
+            {
+                CurrentConfig.CalibrationFactor = oldFactor;
+                TestState = "Calibration Failed (No movement)";
+            }
+
+            IsCalibrating = false;
+            StartCalibrationCommand.NotifyCanExecuteChanged();
+            StartTestCommand.NotifyCanExecuteChanged();
+        }
 
         [RelayCommand(CanExecute = nameof(CanStopTest))]
         private void StopTest()

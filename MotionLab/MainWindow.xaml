@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:oxy="http://oxyplot.org/wpf"
         mc:Ignorable="d"
-        Title="MotionLab" Height="700" Width="1000"
+        Title="MotionLab" Height="700" Width="1000" MinHeight="500" MinWidth="800"
         Background="#F5F5F5" Foreground="Black">
     <Window.Resources>
         <Style TargetType="TextBlock">
@@ -55,7 +55,8 @@
                    Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Margin="10,0,0,20"/>
 
         <!-- Left Panel: Config and Results -->
-        <StackPanel Grid.Row="1" Grid.Column="0">
+        <ScrollViewer Grid.Row="1" Grid.Column="0" VerticalScrollBarVisibility="Auto" Padding="0,0,5,0">
+            <StackPanel>
             <GroupBox Header="Test Configuration">
                 <StackPanel>
                     <TextBlock Text="Surface Type"/>
@@ -92,6 +93,12 @@
                 </WrapPanel>
             </GroupBox>
             
+            <GroupBox Header="Calibration Tools">
+                <WrapPanel>
+                    <Button Content="Run 100mm Auto-Calibration" Command="{Binding StartCalibrationCommand}"/>
+                </WrapPanel>
+            </GroupBox>
+            
             <GroupBox Header="Current State">
                 <StackPanel>
                     <TextBlock Text="{Binding TestState, StringFormat='State: {0}'}" FontWeight="Bold"/>
@@ -101,7 +108,8 @@
                     <TextBlock Text="{Binding CurrentVelocity, StringFormat='Velocity: {0:F2}'}"/>
                 </StackPanel>
             </GroupBox>
-        </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
 
         <!-- Right Panel: Graph and History -->
         <Grid Grid.Row="1" Grid.Column="1" Margin="10,0,0,0">
