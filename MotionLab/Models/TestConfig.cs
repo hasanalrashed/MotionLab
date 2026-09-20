@@ -26,5 +26,10 @@ namespace MotionLab.Models
         /// The test mode (e.g., "Motion Test", "Repeatability Test").
         /// </summary>
         public string TestMode { get; set; } = "Motion Test";
+        /// <summary>
+        /// The number of samples to use for the moving average velocity smoothing filter.
+        /// A value of 1 means no smoothing.
+        /// </summary>
+        public int SmoothingWindowSize { get; set; } = 5;
     }
 }

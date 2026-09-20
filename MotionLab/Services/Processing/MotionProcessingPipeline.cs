@@ -40,6 +40,7 @@ namespace MotionLab.Services.Processing
             double cumulativePath = 0;
             
             TimeSpan previousTimestamp = TimeSpan.Zero;
+            var velocityWindow = new System.Collections.Generic.Queue<double>();
             _stickSlipDetector.Reset();
 
             try
@@ -58,11 +59,29 @@ namespace MotionLab.Services.Processing
                     cumulativePath += deltaPathPhysical;
 
                     TimeSpan deltaTime = rawPoint.Timestamp - previousTimestamp;
-                    double instantaneousVelocity = 0;
+                    double rawVelocity = 0;
                     
                     if (deltaTime.TotalSeconds > 0)
                     {
-                        instantaneousVelocity = deltaPathPhysical / deltaTime.TotalSeconds;
+                        rawVelocity = deltaPathPhysical / deltaTime.TotalSeconds;
+                    }
+
+                    // Data Smoothing (Moving Average Filter)
+                    int targetWindow = Math.Max(1, config.SmoothingWindowSize);
+                    velocityWindow.Enqueue(rawVelocity);
+                    while (velocityWindow.Count > targetWindow)
+                    {
+                        velocityWindow.Dequeue();
+                    }
+
+                    double instantaneousVelocity = 0;
+                    foreach (var v in velocityWindow)
+                    {
+                        instantaneousVelocity += v;
+                    }
+                    if (velocityWindow.Count > 0)
+                    {
+                        instantaneousVelocity /= velocityWindow.Count;
                     }
 
                     var measurement = new MotionMeasurement(

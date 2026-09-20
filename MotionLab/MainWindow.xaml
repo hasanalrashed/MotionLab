@@ -78,6 +78,9 @@
 
                     <TextBlock Text="Calibration Factor (units/mm)"/>
                     <TextBox Text="{Binding CurrentConfig.CalibrationFactor, UpdateSourceTrigger=PropertyChanged}"/>
+
+                    <TextBlock Text="Smoothing Window (samples)"/>
+                    <TextBox Text="{Binding CurrentConfig.SmoothingWindowSize, UpdateSourceTrigger=PropertyChanged}"/>
                 </StackPanel>
             </GroupBox>
 
