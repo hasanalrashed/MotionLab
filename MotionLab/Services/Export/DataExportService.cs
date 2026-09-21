@@ -11,6 +11,7 @@ namespace MotionLab.Services.Export
     {
         Task ExportToJsonAsync(TestResults results, string filePath);
         Task ExportToCsvAsync(TestResults results, string filePath);
+        Task ExportSummaryCsvAsync(System.Collections.Generic.IEnumerable<TestResults> results, string filePath);
     }
 
     public class DataExportService : IDataExportService
@@ -75,6 +76,42 @@ namespace MotionLab.Services.Export
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to export results to CSV: {FilePath}", filePath);
+                throw;
+            }
+        }
+
+        public async Task ExportSummaryCsvAsync(System.Collections.Generic.IEnumerable<TestResults> results, string filePath)
+        {
+            try
+            {
+                using var writer = new StreamWriter(filePath);
+                
+                // Write Header
+                await writer.WriteLineAsync("TestId,StartTime,Surface,TestMode,Duration(s),SampleCount,TotalDisplacement(mm),MeanVelocity(mm/s),PeakVelocity(mm/s),VelocitySD,CoV(%),StickSlipEvents");
+                
+                // Write Data
+                foreach (var r in results)
+                {
+                    await writer.WriteLineAsync(
+                        $"{r.TestId}," +
+                        $"{r.StartTime:yyyy-MM-dd HH:mm:ss}," +
+                        $"{r.Surface}," +
+                        $"{r.TestMode}," +
+                        $"{r.Duration.TotalSeconds:F4}," +
+                        $"{r.SampleCount}," +
+                        $"{r.TotalDisplacement:F4}," +
+                        $"{r.MeanVelocity:F4}," +
+                        $"{r.PeakVelocity:F4}," +
+                        $"{r.VelocityStandardDeviation:F4}," +
+                        $"{r.CoefficientOfVariation:F4}," +
+                        $"{r.StickSlipEventCount}");
+                }
+
+                _logger.LogInformation("Successfully exported summary to CSV: {FilePath}", filePath);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to export summary to CSV: {FilePath}", filePath);
                 throw;
             }
         }

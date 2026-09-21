@@ -39,6 +39,9 @@ namespace MotionLab.ViewModels
         private TestConfig _currentConfig = new();
 
         [ObservableProperty]
+        private TestResults _selectedTestResult;
+
+        [ObservableProperty]
         private TestResults? _currentResults;
 
         [ObservableProperty]
@@ -133,7 +136,23 @@ namespace MotionLab.ViewModels
         [RelayCommand(CanExecute = nameof(CanStartTest))]
         private async Task StartTestAsync()
         {
-            TestState = "Running";
+            bool isRepeatability = CurrentConfig.TestMode == "Repeatability Test";
+
+            if (isRepeatability)
+            {
+                TestState = "Starting in 3...";
+                await Task.Delay(1000);
+                TestState = "Starting in 2...";
+                await Task.Delay(1000);
+                TestState = "Starting in 1...";
+                await Task.Delay(1000);
+                TestState = "GO! Recording 5 seconds...";
+            }
+            else
+            {
+                TestState = "Running";
+            }
+
             StartTestCommand.NotifyCanExecuteChanged();
             StopTestCommand.NotifyCanExecuteChanged();
             ExportCommand.NotifyCanExecuteChanged();
@@ -174,14 +193,23 @@ namespace MotionLab.ViewModels
             // 2. Start Consumer
             var processingTask = _processingPipeline.ProcessAsync(channel.Reader, CurrentConfig, CurrentResults, _testCts.Token);
 
-            try
+            if (isRepeatability)
             {
-                // Wait for the consumer to finish (which happens when the channel is completed or task cancelled)
-                await processingTask;
+                await Task.Delay(5000);
+                if (_testCts != null && !_testCts.IsCancellationRequested)
+                {
+                    StopTest();
+                }
             }
-            catch (OperationCanceledException)
+            else
             {
-                // Expected when test is stopped
+                try
+                {
+                    await processingTask;
+                }
+                catch (OperationCanceledException)
+                {
+                }
             }
         }
 
@@ -197,10 +225,14 @@ namespace MotionLab.ViewModels
             double oldFactor = CurrentConfig.CalibrationFactor;
             CurrentConfig.CalibrationFactor = 1.0;
 
-            TestState = "Calibrating in 3 seconds...";
-            await Task.Delay(3000);
+            TestState = "Calibrating in 3...";
+            await Task.Delay(1000);
+            TestState = "Calibrating in 2...";
+            await Task.Delay(1000);
+            TestState = "Calibrating in 1...";
+            await Task.Delay(1000);
 
-            TestState = "GO! Move exactly 100mm!";
+            TestState = "GO! Move exactly 150mm!";
 
             _testCts = new CancellationTokenSource();
             
@@ -236,9 +268,13 @@ namespace MotionLab.ViewModels
             _testCts.Cancel();
             try { await procTask; } catch (OperationCanceledException) { }
 
+            CurrentResults.EndTime = DateTimeOffset.Now;
+            CurrentResults.Duration = CurrentResults.EndTime - CurrentResults.StartTime;
+            _statisticsService.CalculateFinalStatistics(CurrentResults);
+
             if (CurrentResults.TotalDisplacement > 0)
             {
-                CurrentConfig.CalibrationFactor = 100.0 / CurrentResults.TotalDisplacement;
+                CurrentConfig.CalibrationFactor = 150.0 / CurrentResults.TotalDisplacement;
                 TestState = $"Calibrated: Factor = {CurrentConfig.CalibrationFactor:F4}";
             }
             else
@@ -267,10 +303,11 @@ namespace MotionLab.ViewModels
                 CurrentResults.EndTime = DateTimeOffset.Now;
                 CurrentResults.Duration = CurrentResults.EndTime - CurrentResults.StartTime;
                 
-                // Finalize statistics calculation
                 _statisticsService.CalculateFinalStatistics(CurrentResults);
                 
                 TestHistory.Add(CurrentResults);
+                ClearAllTestsCommand.NotifyCanExecuteChanged();
+                ExportCommand.NotifyCanExecuteChanged();
             }
 
             TestState = "Complete";
@@ -282,26 +319,42 @@ namespace MotionLab.ViewModels
             _logger.LogInformation("Test stopped manually.");
         }
 
-        private bool CanStopTest() => TestState == "Running";
+        private bool CanStopTest() => TestState == "Running" || TestState.StartsWith("GO!");
 
         [RelayCommand(CanExecute = nameof(CanExport))]
         private async Task ExportAsync()
         {
-            if (CurrentResults == null) return;
+            if (TestHistory == null || TestHistory.Count == 0)
+            {
+                MessageBox.Show("No test history to export. Please run and complete a test first.", "Export", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
 
             try
             {
-                string exportFolder = "ExportedData";
+                // In a debug build, AppDomain.CurrentDomain.BaseDirectory is in bin/Debug/net8.0-windows/
+                // We navigate up 4 directories to reach the project root where .gitignore lives.
+                string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+                string projectRoot = System.IO.Path.GetFullPath(System.IO.Path.Combine(baseDir, @"..\..\..\..\"));
+                string exportFolder = System.IO.Path.Combine(projectRoot, "ExportedData");
+
                 if (!System.IO.Directory.Exists(exportFolder))
                 {
                     System.IO.Directory.CreateDirectory(exportFolder);
                 }
 
-                string baseFileName = System.IO.Path.Combine(exportFolder, $"Export_{CurrentResults.TestId.ToString().Substring(0, 8)}_{DateTime.Now:yyyyMMdd_HHmmss}");
-                await _exportService.ExportToCsvAsync(CurrentResults, $"{baseFileName}.csv");
-                await _exportService.ExportToJsonAsync(CurrentResults, $"{baseFileName}.json");
+                foreach (var result in TestHistory)
+                {
+                    string baseFileName = System.IO.Path.Combine(exportFolder, $"Export_{result.TestId.ToString().Substring(0, 8)}_{result.StartTime:yyyyMMdd_HHmmss}");
+                    await _exportService.ExportToCsvAsync(result, $"{baseFileName}.csv");
+                    await _exportService.ExportToJsonAsync(result, $"{baseFileName}.json");
+                }
                 
-                MessageBox.Show($"Exported to {baseFileName}.csv and .json", "Export Successful", MessageBoxButton.OK, MessageBoxImage.Information);
+                // Export a consolidated summary of all tests
+                string summaryFileName = System.IO.Path.Combine(exportFolder, $"Summary_{DateTime.Now:yyyyMMdd_HHmmss}.csv");
+                await _exportService.ExportSummaryCsvAsync(TestHistory, summaryFileName);
+                
+                MessageBox.Show($"Successfully exported {TestHistory.Count} test(s) to:\n{exportFolder}\n\nA consolidated 'Summary' CSV was also generated.", "Export Successful", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
@@ -309,6 +362,36 @@ namespace MotionLab.ViewModels
             }
         }
 
-        private bool CanExport() => CurrentResults != null && (TestState == "Complete" || TestState == "Ready");
+        private bool CanExport() => TestHistory != null && TestHistory.Count > 0;
+
+        partial void OnSelectedTestResultChanged(TestResults value)
+        {
+            DeleteSelectedTestCommand.NotifyCanExecuteChanged();
+        }
+
+        [RelayCommand(CanExecute = nameof(CanDeleteSelectedTest))]
+        private void DeleteSelectedTest()
+        {
+            if (SelectedTestResult != null && TestHistory.Contains(SelectedTestResult))
+            {
+                TestHistory.Remove(SelectedTestResult);
+                ExportCommand.NotifyCanExecuteChanged();
+                ClearAllTestsCommand.NotifyCanExecuteChanged();
+                DeleteSelectedTestCommand.NotifyCanExecuteChanged();
+            }
+        }
+
+        private bool CanDeleteSelectedTest() => SelectedTestResult != null;
+
+        [RelayCommand(CanExecute = nameof(CanClearAllTests))]
+        private void ClearAllTests()
+        {
+            TestHistory.Clear();
+            ExportCommand.NotifyCanExecuteChanged();
+            ClearAllTestsCommand.NotifyCanExecuteChanged();
+            DeleteSelectedTestCommand.NotifyCanExecuteChanged();
+        }
+
+        private bool CanClearAllTests() => TestHistory != null && TestHistory.Count > 0;
     }
 }
