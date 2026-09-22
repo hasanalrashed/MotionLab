@@ -7,6 +7,7 @@ using MotionLab.Services.Calibration;
 using MotionLab.Services.Export;
 using MotionLab.Services.Processing;
 using MotionLab.Services.Statistics;
+using MotionLab.Services.Settings;
 using MotionLab.ViewModels;
 
 namespace MotionLab
@@ -41,6 +42,7 @@ namespace MotionLab
             services.AddSingleton<MotionProcessingPipeline>();
             services.AddSingleton<IStatisticsService, StatisticsService>();
             services.AddSingleton<IDataExportService, DataExportService>();
+            services.AddSingleton<ISettingsService, SettingsService>();
 
             // ViewModels
             services.AddTransient<MainViewModel>();

@@ -11,6 +11,7 @@ using MotionLab.Interfaces;
 using MotionLab.Models;
 using MotionLab.Services.Export;
 using MotionLab.Services.Processing;
+using MotionLab.Services.Settings;
 using MotionLab.Services.Statistics;
 using OxyPlot;
 using OxyPlot.Axes;
@@ -25,6 +26,7 @@ namespace MotionLab.ViewModels
         private readonly MotionProcessingPipeline _processingPipeline;
         private readonly IStatisticsService _statisticsService;
         private readonly IDataExportService _exportService;
+        private readonly ISettingsService _settingsService;
         private readonly ILogger<MainViewModel> _logger;
 
         private CancellationTokenSource? _testCts;
@@ -74,13 +76,17 @@ namespace MotionLab.ViewModels
             MotionProcessingPipeline processingPipeline,
             IStatisticsService statisticsService,
             IDataExportService exportService,
+            ISettingsService settingsService,
             ILogger<MainViewModel> logger)
         {
             _sensor = sensor;
             _processingPipeline = processingPipeline;
             _statisticsService = statisticsService;
             _exportService = exportService;
+            _settingsService = settingsService;
             _logger = logger;
+
+            _ = InitializeSettingsAsync();
 
             // Setup OxyPlot
             LivePlotModel = new PlotModel { Title = "Live Kinematics" };
@@ -98,6 +104,21 @@ namespace MotionLab.ViewModels
             LivePlotModel.Series.Add(_displacementSeries);
 
             _processingPipeline.OnMeasurementProcessed += HandleMeasurementProcessed;
+        }
+
+        private async Task InitializeSettingsAsync()
+        {
+            var loadedConfig = await _settingsService.LoadSettingsAsync();
+            if (loadedConfig != null)
+            {
+                CurrentConfig = loadedConfig;
+            }
+            CurrentConfig.PropertyChanged += CurrentConfig_PropertyChanged;
+        }
+
+        private async void CurrentConfig_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            await _settingsService.SaveSettingsAsync(CurrentConfig);
         }
 
         private void HandleMeasurementProcessed(MotionMeasurement measurement)
