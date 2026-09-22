@@ -183,6 +183,7 @@ namespace MotionLab.ViewModels
             CurrentResults = new TestResults
             {
                 Surface = CurrentConfig.Surface,
+                DeviceName = CurrentConfig.DeviceName,
                 TestMode = CurrentConfig.TestMode,
                 StartTime = DateTimeOffset.Now,
                 CalibrationFactor = CurrentConfig.CalibrationFactor
@@ -260,6 +261,7 @@ namespace MotionLab.ViewModels
             CurrentResults = new TestResults
             {
                 Surface = "Calibration",
+                DeviceName = CurrentConfig.DeviceName,
                 TestMode = "Auto-Calibration",
                 StartTime = DateTimeOffset.Now,
                 CalibrationFactor = 1.0

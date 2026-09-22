@@ -59,6 +59,9 @@
             <StackPanel>
             <GroupBox Header="Test Configuration">
                 <StackPanel>
+                    <TextBlock Text="Device Name"/>
+                    <TextBox Text="{Binding CurrentConfig.DeviceName}"/>
+
                     <TextBlock Text="Surface Type"/>
                     <ComboBox SelectedValue="{Binding CurrentConfig.Surface}" SelectedValuePath="Content">
                         <ComboBoxItem Content="Wooden Desk"/>
@@ -134,6 +137,7 @@
                           GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#EEEEEE"
                           HeadersVisibility="Column">
                     <DataGrid.Columns>
+                        <DataGridTextColumn Header="Device" Binding="{Binding DeviceName}" Width="100"/>
                         <DataGridTextColumn Header="Surface" Binding="{Binding Surface}" Width="100"/>
                         <DataGridTextColumn Header="Mode" Binding="{Binding TestMode}" Width="120"/>
                         <DataGridTextColumn Header="Duration" Binding="{Binding Duration, StringFormat={}{0:mm\\:ss}}" Width="80"/>

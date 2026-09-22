@@ -11,6 +11,7 @@ namespace MotionLab.Models
     {
         public Guid TestId { get; set; } = Guid.NewGuid();
         public string Surface { get; set; } = string.Empty;
+        public string DeviceName { get; set; } = string.Empty;
         public string TestMode { get; set; } = string.Empty;
         public DateTimeOffset StartTime { get; set; }
         public DateTimeOffset EndTime { get; set; }

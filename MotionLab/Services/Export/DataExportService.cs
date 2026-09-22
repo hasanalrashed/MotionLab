@@ -47,6 +47,7 @@ namespace MotionLab.Services.Export
                 
                 // Write Metadata Header
                 await writer.WriteLineAsync($"TestId,{results.TestId}");
+                await writer.WriteLineAsync($"DeviceName,{results.DeviceName}");
                 await writer.WriteLineAsync($"Surface,{results.Surface}");
                 await writer.WriteLineAsync($"TestMode,{results.TestMode}");
                 await writer.WriteLineAsync($"Duration,{results.Duration}");
@@ -87,7 +88,7 @@ namespace MotionLab.Services.Export
                 using var writer = new StreamWriter(filePath);
                 
                 // Write Header
-                await writer.WriteLineAsync("TestId,StartTime,Surface,TestMode,Duration(s),SampleCount,TotalDisplacement(mm),MeanVelocity(mm/s),PeakVelocity(mm/s),VelocitySD,CoV(%),StickSlipEvents");
+                await writer.WriteLineAsync("TestId,StartTime,DeviceName,Surface,TestMode,Duration(s),SampleCount,TotalDisplacement(mm),MeanVelocity(mm/s),PeakVelocity(mm/s),VelocitySD,CoV(%),StickSlipEvents");
                 
                 // Write Data
                 foreach (var r in results)
@@ -95,6 +96,7 @@ namespace MotionLab.Services.Export
                     await writer.WriteLineAsync(
                         $"{r.TestId}," +
                         $"{r.StartTime:yyyy-MM-dd HH:mm:ss}," +
+                        $"{r.DeviceName}," +
                         $"{r.Surface}," +
                         $"{r.TestMode}," +
                         $"{r.Duration.TotalSeconds:F4}," +

@@ -24,6 +24,9 @@ namespace MotionLab.Models
         private string _testMode = "Motion Test";
         
         [ObservableProperty]
+        private string _deviceName = "Default Mouse";
+        
+        [ObservableProperty]
         private int _smoothingWindowSize = 5;
     }
 }
