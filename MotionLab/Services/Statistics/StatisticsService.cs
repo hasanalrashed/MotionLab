@@ -26,6 +26,24 @@ namespace MotionLab.Services.Statistics
             {
                 // Actual average sampling rate
                 results.EstimatedSamplingRateHz = results.SampleCount / results.Duration.TotalSeconds;
+
+                // Calculate Polling Jitter
+                var deltas = new System.Collections.Generic.List<double>();
+                for (int i = 1; i < measurements.Count; i++)
+                {
+                    deltas.Add((measurements[i].Timestamp - measurements[i - 1].Timestamp).TotalMilliseconds);
+                }
+                
+                if (deltas.Any())
+                {
+                    double meanDelta = deltas.Average();
+                    double sumOfSquares = deltas.Select(val => (val - meanDelta) * (val - meanDelta)).Sum();
+                    results.PollingJitterMs = Math.Sqrt(sumOfSquares / deltas.Count);
+                    if (meanDelta > 0)
+                    {
+                        results.PollingJitterPercentage = (results.PollingJitterMs / meanDelta) * 100.0;
+                    }
+                }
             }
 
             results.TotalDisplacement = measurements.Last().PathDisplacement;

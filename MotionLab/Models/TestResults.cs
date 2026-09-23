@@ -19,6 +19,8 @@ namespace MotionLab.Models
         
         public int SampleCount { get; set; }
         public double EstimatedSamplingRateHz { get; set; }
+        public double PollingJitterMs { get; set; }
+        public double PollingJitterPercentage { get; set; }
         public double CalibrationFactor { get; set; }
         
         public double TotalDisplacement { get; set; }

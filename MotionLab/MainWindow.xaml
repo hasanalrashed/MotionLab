@@ -142,6 +142,7 @@
                         <DataGridTextColumn Header="Mode" Binding="{Binding TestMode}" Width="120"/>
                         <DataGridTextColumn Header="Duration" Binding="{Binding Duration, StringFormat={}{0:mm\\:ss}}" Width="80"/>
                         <DataGridTextColumn Header="Samples" Binding="{Binding SampleCount}" Width="80"/>
+                        <DataGridTextColumn Header="Jitter %" Binding="{Binding PollingJitterPercentage, StringFormat={}{0:F1}%}" Width="70"/>
                         <DataGridTextColumn Header="Total Disp" Binding="{Binding TotalDisplacement, StringFormat={}{0:F2}}" Width="100"/>
                         <DataGridTextColumn Header="Mean Vel" Binding="{Binding MeanVelocity, StringFormat={}{0:F2}}" Width="100"/>
                         <DataGridTextColumn Header="Stick-Slip" Binding="{Binding StickSlipEventCount}" Width="80"/>

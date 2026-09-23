@@ -52,6 +52,8 @@ namespace MotionLab.Services.Export
                 await writer.WriteLineAsync($"TestMode,{results.TestMode}");
                 await writer.WriteLineAsync($"Duration,{results.Duration}");
                 await writer.WriteLineAsync($"SampleCount,{results.SampleCount}");
+                await writer.WriteLineAsync($"PollingJitter(ms),{results.PollingJitterMs:F4}");
+                await writer.WriteLineAsync($"PollingJitter(%),{results.PollingJitterPercentage:F4}");
                 await writer.WriteLineAsync($"TotalDisplacement,{results.TotalDisplacement}");
                 await writer.WriteLineAsync($"MeanVelocity,{results.MeanVelocity}");
                 await writer.WriteLineAsync($"StickSlipEvents,{results.StickSlipEventCount}");
@@ -88,7 +90,7 @@ namespace MotionLab.Services.Export
                 using var writer = new StreamWriter(filePath);
                 
                 // Write Header
-                await writer.WriteLineAsync("TestId,StartTime,DeviceName,Surface,TestMode,Duration(s),SampleCount,TotalDisplacement(mm),MeanVelocity(mm/s),PeakVelocity(mm/s),VelocitySD,CoV(%),StickSlipEvents");
+                await writer.WriteLineAsync("TestId,StartTime,DeviceName,Surface,TestMode,Duration(s),SampleCount,PollingJitter(ms),PollingJitter(%),TotalDisplacement(mm),MeanVelocity(mm/s),PeakVelocity(mm/s),VelocitySD,CoV(%),StickSlipEvents");
                 
                 // Write Data
                 foreach (var r in results)
@@ -101,6 +103,8 @@ namespace MotionLab.Services.Export
                         $"{r.TestMode}," +
                         $"{r.Duration.TotalSeconds:F4}," +
                         $"{r.SampleCount}," +
+                        $"{r.PollingJitterMs:F4}," +
+                        $"{r.PollingJitterPercentage:F4}," +
                         $"{r.TotalDisplacement:F4}," +
                         $"{r.MeanVelocity:F4}," +
                         $"{r.PeakVelocity:F4}," +
