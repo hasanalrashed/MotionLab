@@ -123,6 +123,18 @@ namespace MotionLab.ViewModels
 
         private void HandleMeasurementProcessed(MotionMeasurement measurement)
         {
+            // Auto-Stop Distance Evaluation
+            if (CurrentConfig.TestMode != "Auto-Calibration" && CurrentConfig.AutoStopDistanceMm > 0)
+            {
+                if (measurement.PathDisplacement >= CurrentConfig.AutoStopDistanceMm)
+                {
+                    if (_testCts != null && !_testCts.IsCancellationRequested)
+                    {
+                        Application.Current.Dispatcher.InvokeAsync(() => StopTest());
+                    }
+                }
+            }
+
             // Update backing fields directly to avoid INotifyPropertyChanged overhead on background thread if possible, 
             // but we need the UI to update occasionally.
             // Using a dispatcher or throttling is safer for WPF.

@@ -83,6 +83,9 @@
                     <TextBlock Text="Calibration Factor (units/mm)"/>
                     <TextBox Text="{Binding CurrentConfig.CalibrationFactor}"/>
 
+                    <TextBlock Text="Auto-Stop Distance (mm, 0 to disable)"/>
+                    <TextBox Text="{Binding CurrentConfig.AutoStopDistanceMm}"/>
+
                     <TextBlock Text="Smoothing Window (samples)"/>
                     <TextBox Text="{Binding CurrentConfig.SmoothingWindowSize}"/>
                 </StackPanel>

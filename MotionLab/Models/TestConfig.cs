@@ -27,6 +27,9 @@ namespace MotionLab.Models
         private string _deviceName = "Default Mouse";
         
         [ObservableProperty]
+        private double _autoStopDistanceMm = 0;
+        
+        [ObservableProperty]
         private int _smoothingWindowSize = 5;
     }
 }
