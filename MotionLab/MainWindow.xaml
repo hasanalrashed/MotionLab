@@ -148,6 +148,7 @@
                         <DataGridTextColumn Header="Jitter %" Binding="{Binding PollingJitterPercentage, StringFormat={}{0:F1}%}" Width="70"/>
                         <DataGridTextColumn Header="Total Disp" Binding="{Binding TotalDisplacement, StringFormat={}{0:F2}}" Width="100"/>
                         <DataGridTextColumn Header="Mean Vel" Binding="{Binding MeanVelocity, StringFormat={}{0:F2}}" Width="100"/>
+                        <DataGridTextColumn Header="Peak Accel" Binding="{Binding PeakAcceleration, StringFormat={}{0:F1}}" Width="90"/>
                         <DataGridTextColumn Header="Stick-Slip" Binding="{Binding StickSlipEventCount}" Width="80"/>
                     </DataGrid.Columns>
                 </DataGrid>

@@ -26,6 +26,8 @@ namespace MotionLab.Models
         public double TotalDisplacement { get; set; }
         public double MeanVelocity { get; set; }
         public double PeakVelocity { get; set; }
+        public double MeanAcceleration { get; set; }
+        public double PeakAcceleration { get; set; }
         public double VelocityStandardDeviation { get; set; }
         public double CoefficientOfVariation { get; set; }
         public int StickSlipEventCount { get; set; }

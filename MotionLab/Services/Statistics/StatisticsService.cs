@@ -65,6 +65,24 @@ namespace MotionLab.Services.Statistics
                 {
                     results.CoefficientOfVariation = (results.VelocityStandardDeviation / results.MeanVelocity) * 100.0;
                 }
+
+                // Calculate Acceleration
+                var accelerations = new System.Collections.Generic.List<double>();
+                for (int i = 1; i < measurements.Count; i++)
+                {
+                    double dt = (measurements[i].Timestamp - measurements[i - 1].Timestamp).TotalSeconds;
+                    if (dt > 0)
+                    {
+                        double dv = measurements[i].InstantaneousVelocity - measurements[i - 1].InstantaneousVelocity;
+                        accelerations.Add(Math.Abs(dv / dt)); // Absolute acceleration (magnitude of change)
+                    }
+                }
+
+                if (accelerations.Any())
+                {
+                    results.MeanAcceleration = accelerations.Average();
+                    results.PeakAcceleration = accelerations.Max();
+                }
             }
         }
     }

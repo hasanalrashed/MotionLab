@@ -56,6 +56,9 @@ namespace MotionLab.Services.Export
                 await writer.WriteLineAsync($"PollingJitter(%),{results.PollingJitterPercentage:F4}");
                 await writer.WriteLineAsync($"TotalDisplacement,{results.TotalDisplacement}");
                 await writer.WriteLineAsync($"MeanVelocity,{results.MeanVelocity}");
+                await writer.WriteLineAsync($"PeakVelocity,{results.PeakVelocity}");
+                await writer.WriteLineAsync($"MeanAcceleration,{results.MeanAcceleration}");
+                await writer.WriteLineAsync($"PeakAcceleration,{results.PeakAcceleration}");
                 await writer.WriteLineAsync($"StickSlipEvents,{results.StickSlipEventCount}");
                 
                 await writer.WriteLineAsync(); // Empty line separator
@@ -90,7 +93,7 @@ namespace MotionLab.Services.Export
                 using var writer = new StreamWriter(filePath);
                 
                 // Write Header
-                await writer.WriteLineAsync("TestId,StartTime,DeviceName,Surface,TestMode,Duration(s),SampleCount,PollingJitter(ms),PollingJitter(%),TotalDisplacement(mm),MeanVelocity(mm/s),PeakVelocity(mm/s),VelocitySD,CoV(%),StickSlipEvents");
+                await writer.WriteLineAsync("TestId,StartTime,DeviceName,Surface,TestMode,Duration(s),SampleCount,PollingJitter(ms),PollingJitter(%),TotalDisplacement(mm),MeanVelocity(mm/s),PeakVelocity(mm/s),MeanAcceleration(mm/s^2),PeakAcceleration(mm/s^2),VelocitySD,CoV(%),StickSlipEvents");
                 
                 // Write Data
                 foreach (var r in results)
@@ -108,6 +111,8 @@ namespace MotionLab.Services.Export
                         $"{r.TotalDisplacement:F4}," +
                         $"{r.MeanVelocity:F4}," +
                         $"{r.PeakVelocity:F4}," +
+                        $"{r.MeanAcceleration:F4}," +
+                        $"{r.PeakAcceleration:F4}," +
                         $"{r.VelocityStandardDeviation:F4}," +
                         $"{r.CoefficientOfVariation:F4}," +
                         $"{r.StickSlipEventCount}");
